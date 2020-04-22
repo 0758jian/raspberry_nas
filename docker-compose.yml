@@ -1,0 +1,130 @@
+version: "3.3"
+services:
+  qbittorrent:
+    image: vyg1pur0.mirror.aliyuncs.com/linuxserver/qbittorrent
+    container_name: ds-qbittorrent
+    restart: always
+    environment:    
+      - WEBUI_PORT=8080
+      - UMASK_SET=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Asia/Hong_Kong
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./qbittorrent/config:/config
+      - ${DOWNLOAD_PATH}:/downloads
+    ports:
+      - "${QBITTORRENT_WEB_PORT}:8080"
+      #由于PT站把6881列为balcklist所以改端口
+      - "${QBITTORRENT_PORT}:${QBITTORRENT_PORT}/tcp"
+      - "${QBITTORRENT_PORT}:${QBITTORRENT_PORT}/udp"
+  transmission:
+    image: vyg1pur0.mirror.aliyuncs.com/linuxserver/transmission:latest
+    container_name: ds-transmission
+    restart: always
+    environment:
+      - TRANSMISSION_WEB_HOME=/transmission-web-control/
+      - USER=${TRANSMISSION_USER}
+      - PASS=${TRANSMISSION_PASS}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Asia/Hong_Kong
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./transmission/config:/config
+      - ./transmission/watch:/watch
+      - ${DOWNLOAD_PATH}:/downloads
+    ports:
+      - "${TRANSMISSION_WEB_PORT}:9091"
+      - "${TRANSMISSION_PORT}:${TRANSMISSION_PORT}/tcp"
+      - "${TRANSMISSION_PORT}:${TRANSMISSION_PORT}/udp"
+  aria2:
+    image: wahyd4/aria2-ui:arm32
+    container_name: ds-aria2
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - ENABLE_AUTH=true
+      - ARIA2_USER=${ARIA2_USER}
+      - ARIA2_PWD=${ARIA2_PWD}
+      - RPC_SECRET=${ARIA2_SECRET}
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./aria2/conf:/app/conf
+      - ./aria2/filebrowser.db:/app/filebrowser.db
+      - ${DOWNLOAD_PATH}:/data
+    ports:
+      - "${ARIA2_WEB_PORT}:80"  
+  bitwarden:
+    image: bitwardenrs/server:raspberry
+    container_name: ds-bitwarden
+    restart: always
+    environment:
+      #由于用nginx proxy所以不需要设置这里绑域名  
+      #- DOMAIN=yourdomain.cn
+      #- ROCKET_TLS={certs="/acme/yourdomain.cn.pem",key="/acme/yourdomain.cn.key"}
+      - SIGNUPS_ALLOWED=false
+      - SMTP_EXPLICIT_TLS=${BITWARDEN_SMTP_SSL}      
+      - SMTP_HOST=${BITWARDEN_SMTP_HOST}      
+      - SMTP_SSL=${BITWARDEN_SMTP_SSL}
+      - SMTP_PORT=${BITWARDEN_SMTP_PORT}
+      - SMTP_FROM=${BITWARDEN_SMTP_FROM}
+      - SMTP_USERNAME=${BITWARDEN_SMTP_USERNAME}
+      - SMTP_PASSWORD=${BITWARDEN_SMTP_PASSWORD}
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./bitwarden:/data
+    ports:
+      - "8833:80"
+  mysql:
+    image: hypriot/rpi-mysql
+    container_name: ds-mysql
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./mysql/conf/my.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+      - ./mysql/data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+  nextcloud:
+    image: nextcloud:fpm
+    container_name: ds-nextcloud
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./wwwroot:/var/www/html
+      - ${NEXTCLOUD_DATA_PATH}:/var/www/html/data
+  nginx:
+    image: nginx:1.17.6-alpine
+    restart: always
+    container_name: ds-nginx
+    working_dir: /var/www/html
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./wwwroot:/var/www/html
+      - ./nginx:/etc/nginx/conf.d
+      - ./acme:/acme
+    depends_on:
+      - nextcloud
+      - mysql
+    ports:
+      #由于omv占用了80所以改其他
+      - "${NGINX_HTTP_PORT}:80"
+      - "${NGINX_HTTPS_PORT}:443"
+  frp: 
+    image: vyg1pur0.mirror.aliyuncs.com/snowdreamtech/frpc:latest   
+    restart: always
+    container_name: ds-frp
+    command: daemon
+    network_mode: host
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./frp/frpc.ini:/etc/frp/frpc.ini
+      - ./acme:/acme   
