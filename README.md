@@ -7,6 +7,8 @@
 - frp：内网穿透
 - nginx：主要用于https访问，反代到各应用上
 ### clone下来后，frp、nginx的配置信息，根据实际自行修改
+- mysql 目前只有nextcloud结合使用，当然你也可以加个wordpress容器用
+- acme 目录是放置相关域名的证书地方
 ### 使用方式，根据实际配置.env里的参数
 ```
     git clone https://github.com/0758jian/raspberry_nas.git raspberry
