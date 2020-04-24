@@ -13,7 +13,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime
       - ./qbittorrent/config:/config
-      - ${DOWNLOAD_PATH}/downloads:/downloads
+      - ${HARD_DISK_PATH}/downloads:/downloads
     ports:
       - "${QBITTORRENT_WEB_PORT}:${QBITTORRENT_WEB_PORT}"
       #由于PT站把6881列为balcklist所以改端口
@@ -34,7 +34,7 @@ services:
       - /etc/localtime:/etc/localtime
       - ./transmission/config:/config
       - ./transmission/watch:/watch
-      - ${DOWNLOAD_PATH}/downloads:/downloads
+      - ${HARD_DISK_PATH}/downloads:/downloads
     ports:
       - "${TRANSMISSION_WEB_PORT}:9091"
       - "${TRANSMISSION_PORT}:${TRANSMISSION_PORT}/tcp"
@@ -54,7 +54,7 @@ services:
       - /etc/localtime:/etc/localtime
       - ./aria2/conf:/app/conf
       - ./aria2/filebrowser.db:/app/filebrowser.db
-      - ${DOWNLOAD_PATH}/downloads:/data
+      - ${HARD_DISK_PATH}/downloads:/data
     ports:
       - "${ARIA2_WEB_PORT}:80"  
   bitwarden:
