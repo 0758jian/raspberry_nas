@@ -119,16 +119,6 @@ services:
       #由于omv占用了80所以改其他
       - "${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}"
       - "${NGINX_HTTPS_PORT}:${NGINX_HTTPS_PORT}"
-  frp: 
-    image: vyg1pur0.mirror.aliyuncs.com/snowdreamtech/frpc:latest   
-    restart: unless-stopped
-    container_name: ds-frp
-    command: daemon
-    network_mode: host
-    volumes:
-      - /etc/localtime:/etc/localtime
-      - ./frp/frpc.ini:/etc/frp/frpc.ini
-      - ./acme:/acme   
   jellyfin:
     image: vyg1pur0.mirror.aliyuncs.com/linuxserver/jellyfin:arm32v7-latest
     container_name: ds-jellyfin
@@ -154,3 +144,40 @@ services:
       #开启open OMX硬解
       - /dev/vc-mem:/dev/vc-mem
       - /dev/vchiq:/dev/vchiq
+  frp: 
+    image: vyg1pur0.mirror.aliyuncs.com/snowdreamtech/frpc:latest   
+    restart: unless-stopped
+    container_name: ds-frp
+    command: daemon
+    network_mode: host
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./frp/frpc.ini:/etc/frp/frpc.ini
+      - ./acme:/acme
+  frp: 
+    image: vyg1pur0.mirror.aliyuncs.com/snowdreamtech/frpc:latest   
+    restart: unless-stopped
+    container_name: ds-frp
+    command: daemon
+    network_mode: host
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./frp/frpc.ini:/etc/frp/frpc.ini
+      - ./acme:/acme
+  homeassistant:
+    container_name: home-assistant
+    image: vyg1pur0.mirror.aliyuncs.com/homeassistant/raspberrypi4-homeassistant:latest
+    privileged: true
+    restart: always
+    network_mode: host
+    ports:
+      - ${HOME_ASSISTANT_HTTP_PORT}:8123
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/snd:/dev/snd
+    environment:
+      - TZ=Asia/Hong_Kong
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ${HARD_DISK_PATH}/homeassistant/confg:/config
+
