@@ -7,6 +7,7 @@
 - frp：内网穿透
 - jellyfin 这个大文件视频，性能就呵呵了。已经配openOMX了
 - nginx：主要用于https访问，反代到各应用上
+- home assistant: 智能家居管理
 ### clone下来后，frp、nginx的配置信息，根据实际自行修改
 - mysql 目前只有nextcloud结合使用，当然你也可以加个wordpress容器用
 - acme 目录是放置相关域名的证书地方

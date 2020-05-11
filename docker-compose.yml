@@ -154,16 +154,6 @@ services:
       - /etc/localtime:/etc/localtime
       - ./frp/frpc.ini:/etc/frp/frpc.ini
       - ./acme:/acme
-  frp: 
-    image: vyg1pur0.mirror.aliyuncs.com/snowdreamtech/frpc:latest   
-    restart: unless-stopped
-    container_name: ds-frp
-    command: daemon
-    network_mode: host
-    volumes:
-      - /etc/localtime:/etc/localtime
-      - ./frp/frpc.ini:/etc/frp/frpc.ini
-      - ./acme:/acme
   homeassistant:
     container_name: home-assistant
     image: vyg1pur0.mirror.aliyuncs.com/homeassistant/raspberrypi4-homeassistant:latest
