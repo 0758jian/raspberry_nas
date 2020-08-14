@@ -40,23 +40,35 @@ services:
       - "${TRANSMISSION_PORT}:${TRANSMISSION_PORT}/tcp"
       - "${TRANSMISSION_PORT}:${TRANSMISSION_PORT}/udp"
   aria2:
-    image: wahyd4/aria2-ui:arm32
+    imagearia2:
+    image: p3terx/aria2-pro
     container_name: ds-aria2
     restart: unless-stopped
+    #network_mode: host
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - ENABLE_AUTH=true
-      - ARIA2_USER=${ARIA2_USER}
-      - ARIA2_PWD=${ARIA2_PWD}
       - RPC_SECRET=${ARIA2_SECRET}
+      - RPC_PORT=6800
+      - LISTEN_PORT=6888
     volumes:
-      - /etc/localtime:/etc/localtime
-      - ./aria2/conf:/app/conf
-      - ./aria2/filebrowser.db:/app/filebrowser.db
-      - ${HARD_DISK_PATH}/downloads:/data
+      - ./aria2/conf:/config
+      - ${HARD_DISK_PATH}/downloads:/downloads
     ports:
-      - "${ARIA2_WEB_PORT}:80"  
+      - "6800:6800"  
+      - "6888:6888"  
+      - "6888:6888/udp"  
+  ariang:
+    image: p3terx/ariang
+    container_name: ds-ariang
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+    ports:
+      - "6880:6880"
   bitwarden:
     image: bitwardenrs/server:raspberry
     container_name: ds-bitwarden
@@ -168,6 +180,5 @@ services:
     environment:
       - TZ=Asia/Hong_Kong
     volumes:
-      - /etc/localtime:/etc/localtime
       - ${HARD_DISK_PATH}/homeassistant/confg:/config
 
